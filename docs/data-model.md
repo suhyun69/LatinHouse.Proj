@@ -9,7 +9,7 @@
 | id | String | PK | 8자리 난수. 대/소문자+숫자 혼용, `i I 1 l 0 o O` 제외 |
 | nickname | String | NOT NULL | 중복 허용 |
 | sex | String | | `"M"` 또는 `"F"` |
-| isInstructor | Boolean | default false | 강사 여부 |
+| isInstructor | Boolean | default false | 강사 여부. `PATCH /api/profile/{profileId}/instructor` 호출 시 `true`로 변경됨 |
 
 ### Domain
 
@@ -18,7 +18,7 @@
 | id | String | PK | 8자리 난수. 대/소문자+숫자 혼용, `i I 1 l 0 o O` 제외 |
 | nickname | String | Not null | 중복 허용 |
 | sex | Sex | Enum | `M(Male)` / `F(Female)` |
-| isInstructor | Boolean | default false | 강사 여부 |
+| isInstructor | Boolean | default false | 강사 여부. `PATCH /api/profile/{profileId}/instructor` 호출 시 `true`로 변경됨 |
 
 ### ID 규칙
 
