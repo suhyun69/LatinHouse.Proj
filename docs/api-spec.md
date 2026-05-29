@@ -35,7 +35,153 @@
 |------|------|
 | VALIDATION_ERROR | 요청 데이터 검증 실패 |
 | PROFILE_NOT_FOUND | 프로필을 찾을 수 없음 |
+| INSTRUCTOR_NOT_FOUND | 강사 프로필을 찾을 수 없음 |
+| INSTRUCTOR_NOT_VALID | 강사 조건 미충족 (isInstructor=false 또는 sex 불일치) |
 | INTERNAL_ERROR | 서버 내부 오류 |
+
+---
+
+## Lesson
+
+### POST /api/lesson
+레슨을 생성한다.
+
+#### Request
+```json
+{
+  "title": "string",
+  "genre": "S",
+  "instructorLo": "Ab2Cd3Ef",
+  "instructorLa": null,
+  "options": [
+    {
+      "startDate": "2026-06-01",
+      "startTime": "10:00",
+      "endDate": "2026-06-01",
+      "endTime": "12:00",
+      "region": "GN",
+      "place": "강남 스튜디오",
+      "placeUrl": "https://example.com/map"
+    }
+  ],
+  "amount": 80000,
+  "discounts": [
+    {
+      "type": "E",
+      "condition": "2026-05-25",
+      "amount": 10000
+    },
+    {
+      "type": "S",
+      "condition": "F",
+      "amount": 5000
+    }
+  ],
+  "account": {
+    "bank": "카카오뱅크",
+    "account": "3333-01-1234567",
+    "name": "홍길동"
+  },
+  "contacts": [
+    {
+      "type": "K",
+      "account": "kakao_id",
+      "name": "카카오채널"
+    }
+  ],
+  "isActive": true,
+  "notices": [
+    {
+      "type": "N",
+      "text": "환불은 수업 3일 전까지 가능합니다."
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| title | String | Y | 레슨 제목 |
+| genre | String | Y | 장르. `S`(Salsa) 또는 `B`(Bachata) |
+| instructorLo | String | △ | 남성 강사 Profile.id. instructorLa와 둘 중 하나 이상 필수 |
+| instructorLa | String | △ | 여성 강사 Profile.id. instructorLo와 둘 중 하나 이상 필수 |
+| options | List | Y | 수업 옵션. 1개 이상 필수 |
+| options[].startDate | String | Y | 시작 날짜. `yyyy-MM-dd` 형식 |
+| options[].startTime | String | Y | 시작 시간. `HH:mm` 형식 |
+| options[].endDate | String | Y | 종료 날짜. `yyyy-MM-dd` 형식 |
+| options[].endTime | String | Y | 종료 시간. `HH:mm` 형식. startDate+startTime보다 이후여야 함 |
+| options[].region | String | Y | 지역. `GN`(Gangnam) 또는 `HD`(Hongdae) |
+| options[].place | String | N | 장소명 |
+| options[].placeUrl | String | N | 장소 URL |
+| amount | BigDecimal | N | 수강료 |
+| discounts | List | N | 할인 목록 |
+| discounts[].type | String | Y | `E`(Earlybird) 또는 `S`(Sex) |
+| discounts[].condition | String | Y | type=E: `yyyy-MM-dd` 날짜 / type=S: `M` 또는 `F` |
+| discounts[].amount | BigDecimal | N | 할인 금액 |
+| account | Object | N | 입금 계좌 정보 |
+| account.bank | String | N | 은행명 |
+| account.account | String | N | 계좌번호 |
+| account.name | String | N | 예금주 |
+| contacts | List | N | 연락처 목록 |
+| contacts[].type | String | Y | `Y`/`K`/`W`/`I`/`L`/`M` |
+| contacts[].account | String | N | 연락처 계정 |
+| contacts[].name | String | N | 표시명 |
+| isActive | Boolean | N | 활성 여부. 기본값 `true` |
+| notices | List | N | 공지 목록 |
+| notices[].type | String | Y | `L`/`T`/`R`/`N`/`U` |
+| notices[].text | String | N | 공지 내용 |
+
+#### Response
+| Status | 설명 |
+|--------|------|
+| 201 Created | 레슨 생성 성공. 생성된 레슨 id 반환 |
+
+```json
+{
+  "id": 1
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | 생성된 레슨 ID |
+
+#### Validation Error — 400 Bad Request (webRequest)
+
+| 필드 | 조건 | 에러 메시지 |
+|------|------|------------|
+| title | null 또는 빈 문자열 | 제목을 입력해 주세요. |
+| genre | null 또는 빈 문자열 | 장르를 입력해 주세요. |
+| genre | S, B 외의 값 | 장르는 S 또는 B만 입력 가능합니다. |
+| options | null 또는 빈 리스트 | 수업 옵션을 1개 이상 입력해 주세요. |
+| options[].startDate | null 또는 빈 문자열 | 시작 날짜를 입력해 주세요. |
+| options[].startDate | yyyy-MM-dd 형식이 아닌 경우 | 시작 날짜는 yyyy-MM-dd 형식으로 입력해 주세요. |
+| options[].startTime | null 또는 빈 문자열 | 시작 시간을 입력해 주세요. |
+| options[].startTime | HH:mm 형식이 아닌 경우 | 시작 시간은 HH:mm 형식으로 입력해 주세요. |
+| options[].endDate | null 또는 빈 문자열 | 종료 날짜를 입력해 주세요. |
+| options[].endDate | yyyy-MM-dd 형식이 아닌 경우 | 종료 날짜는 yyyy-MM-dd 형식으로 입력해 주세요. |
+| options[].endTime | null 또는 빈 문자열 | 종료 시간을 입력해 주세요. |
+| options[].endTime | HH:mm 형식이 아닌 경우 | 종료 시간은 HH:mm 형식으로 입력해 주세요. |
+| options[].region | null 또는 빈 문자열 | 지역을 입력해 주세요. |
+| options[].region | GN, HD 외의 값 | 지역은 GN 또는 HD만 입력 가능합니다. |
+| discounts[].type | E, S 외의 값 | 할인 타입은 E 또는 S만 입력 가능합니다. |
+| contacts[].type | Y, K, W, I, L, M 외의 값 | 연락처 타입이 올바르지 않습니다. |
+| notices[].type | L, T, R, N, U 외의 값 | 공지 타입이 올바르지 않습니다. |
+
+#### Business Rule Error — 400 Bad Request (appRequest)
+
+| 조건 | 에러 코드 | 에러 메시지 |
+|------|-----------|------------|
+| instructorLo, instructorLa 모두 null | VALIDATION_ERROR | 남성 강사 또는 여성 강사 중 하나는 반드시 입력해야 합니다. |
+| instructorLo에 해당하는 프로필 없음 | INSTRUCTOR_NOT_FOUND | 존재하지 않는 강사 ID입니다. |
+| instructorLo의 isInstructor=false | INSTRUCTOR_NOT_VALID | 강사로 등록되지 않은 프로필입니다. |
+| instructorLo의 sex=F | INSTRUCTOR_NOT_VALID | 남성 강사(instructorLo)에는 남성(M) 프로필만 등록 가능합니다. |
+| instructorLa에 해당하는 프로필 없음 | INSTRUCTOR_NOT_FOUND | 존재하지 않는 강사 ID입니다. |
+| instructorLa의 isInstructor=false | INSTRUCTOR_NOT_VALID | 강사로 등록되지 않은 프로필입니다. |
+| instructorLa의 sex=M | INSTRUCTOR_NOT_VALID | 여성 강사(instructorLa)에는 여성(F) 프로필만 등록 가능합니다. |
+| options[].startDateTime >= endDateTime | VALIDATION_ERROR | 시작 일시는 종료 일시보다 이전이어야 합니다. |
+| discounts[].type=E이고 condition이 yyyy-MM-dd 형식 아님 | VALIDATION_ERROR | 얼리버드 할인 조건은 yyyy-MM-dd 형식의 날짜여야 합니다. |
+| discounts[].type=S이고 condition이 M, F 외의 값 | VALIDATION_ERROR | 성별 할인 조건은 M 또는 F만 입력 가능합니다. |
 
 ---
 
