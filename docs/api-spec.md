@@ -92,3 +92,38 @@
   ]
 }
 ```
+
+---
+
+### PATCH /api/profile/{profileId}/instructor
+프로필을 강사로 지정한다. `isInstructor`를 `true`로 변경한다.
+
+#### Path Parameters
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| profileId | String | Y | 프로필 ID |
+
+#### Request Body
+없음
+
+#### Response
+| Status | 설명 |
+|--------|------|
+| 200 OK | 강사 지정 성공. 대상 프로필 id 반환 |
+
+```json
+{
+  "id": "Ab2Cd3Ef"
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | String | 강사로 지정된 프로필 ID |
+
+#### Error
+
+| Status | 에러 코드 | 설명 |
+|--------|-----------|------|
+| 404 Not Found | `PROFILE_NOT_FOUND` | 존재하지 않는 profileId |
