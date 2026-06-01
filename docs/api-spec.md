@@ -241,6 +241,46 @@
 
 ---
 
+### GET /api/profiles
+프로필 목록을 조회한다.
+
+#### Query Parameters
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| isInstructor | Boolean | N | 강사 여부 필터. `true` = 강사만, `false` = 비강사만, 생략 시 전체 반환 |
+
+#### Response
+| Status | 설명 |
+|--------|------|
+| 200 OK | 프로필 목록 반환. 결과 없으면 빈 배열 반환 |
+
+```json
+[
+  {
+    "id": "Ab2Cd3Ef",
+    "nickname": "홍길동",
+    "sex": "M",
+    "isInstructor": true
+  }
+]
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | String | 프로필 ID (8자리 랜덤 문자열) |
+| nickname | String | 닉네임 |
+| sex | String | 성별. `M` 또는 `F` |
+| isInstructor | Boolean | 강사 여부 |
+
+#### Validation Error — 400 Bad Request
+
+| 파라미터 | 조건 | 에러 메시지 |
+|----------|------|------------|
+| isInstructor | `true`, `false` 외의 값 | isInstructor는 true 또는 false만 입력 가능합니다. |
+
+---
+
 ### PATCH /api/profile/{profileId}/instructor
 프로필을 강사로 지정한다. `isInstructor`를 `true`로 변경한다.
 
