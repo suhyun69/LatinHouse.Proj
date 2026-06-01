@@ -37,11 +37,128 @@
 | PROFILE_NOT_FOUND | 프로필을 찾을 수 없음 |
 | INSTRUCTOR_NOT_FOUND | 강사 프로필을 찾을 수 없음 |
 | INSTRUCTOR_NOT_VALID | 강사 조건 미충족 (isInstructor=false 또는 sex 불일치) |
+| LESSON_NOT_FOUND | 레슨을 찾을 수 없음 |
 | INTERNAL_ERROR | 서버 내부 오류 |
 
 ---
 
 ## Lesson
+
+### GET /api/lessons/{lessonNo}
+레슨 단건을 조회한다.
+
+#### Path Parameters
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| lessonNo | Long | Y | 레슨 ID |
+
+#### Request Body
+없음
+
+#### Response
+| Status | 설명 |
+|--------|------|
+| 200 OK | 레슨 단건 반환 |
+
+```json
+{
+  "id": 1,
+  "title": "살사 초급반",
+  "genre": "S",
+  "instructorLo": "Ab2Cd3Ef",
+  "instructorLa": null,
+  "options": [
+    {
+      "id": 1,
+      "startDate": "2026-06-01",
+      "startTime": "10:00",
+      "endDate": "2026-06-01",
+      "endTime": "12:00",
+      "region": "GN",
+      "place": "강남 스튜디오",
+      "placeUrl": "https://example.com/map"
+    }
+  ],
+  "amount": 80000,
+  "discounts": [
+    {
+      "id": 1,
+      "type": "E",
+      "condition": "2026-05-25",
+      "amount": 10000
+    }
+  ],
+  "account": {
+    "id": 1,
+    "bank": "카카오뱅크",
+    "account": "3333-01-1234567",
+    "name": "홍길동"
+  },
+  "contacts": [
+    {
+      "id": 1,
+      "type": "K",
+      "account": "kakao_id",
+      "name": "카카오채널"
+    }
+  ],
+  "isActive": true,
+  "notices": [
+    {
+      "id": 1,
+      "type": "N",
+      "text": "환불은 수업 3일 전까지 가능합니다."
+    }
+  ]
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | 레슨 ID |
+| title | String | 레슨 제목 |
+| genre | String | 장르. `S`(Salsa) 또는 `B`(Bachata) |
+| instructorLo | String | 남성 강사 Profile.id. 없으면 null |
+| instructorLa | String | 여성 강사 Profile.id. 없으면 null |
+| options | List | 수업 옵션 목록 |
+| options[].id | Long | 수업 옵션 ID |
+| options[].startDate | String | 시작 날짜. `yyyy-MM-dd` 형식 |
+| options[].startTime | String | 시작 시간. `HH:mm` 형식 |
+| options[].endDate | String | 종료 날짜. `yyyy-MM-dd` 형식 |
+| options[].endTime | String | 종료 시간. `HH:mm` 형식 |
+| options[].region | String | 지역. `GN`(Gangnam) 또는 `HD`(Hongdae) |
+| options[].place | String | 장소명. 없으면 null |
+| options[].placeUrl | String | 장소 URL. 없으면 null |
+| amount | BigDecimal | 수강료. 없으면 null |
+| discounts | List | 할인 목록. 없으면 빈 배열 |
+| discounts[].id | Long | 할인 ID |
+| discounts[].type | String | `E`(Earlybird) 또는 `S`(Sex) |
+| discounts[].condition | String | type=E: `yyyy-MM-dd` 날짜 / type=S: `M` 또는 `F` |
+| discounts[].amount | BigDecimal | 할인 금액. 없으면 null |
+| account | Object | 입금 계좌 정보. 없으면 null |
+| account.id | Long | 계좌 ID |
+| account.bank | String | 은행명. 없으면 null |
+| account.account | String | 계좌번호. 없으면 null |
+| account.name | String | 예금주. 없으면 null |
+| contacts | List | 연락처 목록. 없으면 빈 배열 |
+| contacts[].id | Long | 연락처 ID |
+| contacts[].type | String | `Y`/`K`/`W`/`I`/`L`/`M` |
+| contacts[].account | String | 연락처 계정. 없으면 null |
+| contacts[].name | String | 표시명. 없으면 null |
+| isActive | Boolean | 활성 여부 |
+| notices | List | 공지 목록. 없으면 빈 배열 |
+| notices[].id | Long | 공지 ID |
+| notices[].type | String | `L`/`T`/`R`/`N`/`U` |
+| notices[].text | String | 공지 내용. 없으면 null |
+
+#### Error
+
+| Status | 에러 코드 | 설명 |
+|--------|-----------|------|
+| 404 Not Found | `LESSON_NOT_FOUND` | 존재하지 않는 lessonNo |
+
+---
 
 ### POST /api/lesson
 레슨을 생성한다.
