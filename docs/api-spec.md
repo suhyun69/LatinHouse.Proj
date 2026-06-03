@@ -44,6 +44,89 @@
 
 ## Lesson
 
+### GET /api/lessons
+레슨 목록을 조회한다. 레슨은 Option 단위로 펼쳐서 반환한다.
+
+#### Query Parameters
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| region | String | N | 지역 필터. `GN`(Gangnam) 또는 `HD`(Hongdae). 생략 시 전체 |
+| instructor | String | N | 강사 필터. Profile.id. instructorLo 또는 instructorLa가 일치하는 레슨 반환 |
+| genre | String | N | 장르 필터. `S`(Salsa) 또는 `B`(Bachata). 생략 시 전체 |
+
+복수 필터는 AND 조건으로 결합된다.
+
+#### Response
+| Status | 설명 |
+|--------|------|
+| 200 OK | 레슨 옵션 목록 반환. 결과 없으면 빈 배열 반환 |
+
+```json
+[
+  {
+    "optionId": 1,
+    "lessonNo": 10,
+    "instructorLo": "Ab2Cd3Ef",
+    "instructorLa": null,
+    "title": "살사 초급반",
+    "genre": "S",
+    "startDate": "2026-07-01",
+    "startTime": "10:00",
+    "endDate": "2026-07-01",
+    "endTime": "12:00",
+    "region": "GN",
+    "price": 80000,
+    "discountCondition": "2026-06-20",
+    "discountAmount": 10000,
+    "status": "PENDING"
+  }
+]
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| optionId | Long | 수업 옵션 ID |
+| lessonNo | Long | 레슨 ID |
+| instructorLo | String | 남성 강사 Profile.id. 없으면 null |
+| instructorLa | String | 여성 강사 Profile.id. 없으면 null |
+| title | String | 레슨 제목 |
+| genre | String | 장르. `S`(Salsa) 또는 `B`(Bachata) |
+| startDate | String | 옵션 시작 날짜. `yyyy-MM-dd` 형식 |
+| startTime | String | 옵션 시작 시간. `HH:mm` 형식 |
+| endDate | String | 옵션 종료 날짜. `yyyy-MM-dd` 형식 |
+| endTime | String | 옵션 종료 시간. `HH:mm` 형식 |
+| region | String | 옵션 지역. `GN`(Gangnam) 또는 `HD`(Hongdae) |
+| price | BigDecimal | 수강료. 없으면 null |
+| discountCondition | String | 적용 얼리버드 할인 마감일 (`yyyy-MM-dd`). 없으면 null |
+| discountAmount | BigDecimal | 적용 얼리버드 할인 금액. 없으면 null |
+| status | String | 수업 상태. `INACTIVE` / `PENDING` / `IN_PROGRESS` / `DONE` |
+
+**status 계산 규칙**
+
+| 조건 | status |
+|------|--------|
+| `Lesson.isActive = false` | `INACTIVE` |
+| `isActive = true` 이고 현재 시점 < option.startDateTime | `PENDING` |
+| `isActive = true` 이고 startDateTime ≤ 현재 시점 ≤ endDateTime | `IN_PROGRESS` |
+| `isActive = true` 이고 현재 시점 > option.endDateTime | `DONE` |
+
+**discount 계산 규칙 (얼리버드만 적용)**
+
+1. `Lesson.discounts` 중 `type = "E"` (Earlybird) 인 것만 대상
+2. `condition`을 날짜로 파싱하여 현재 날짜 이후인 것만 후보 (`LocalDate.parse(condition) >= LocalDate.now()`)
+3. 후보가 없으면 `discountCondition = null`, `discountAmount = null`
+4. 후보가 복수이면 `condition` 기준 오름차순 가장 빠른 1건 적용
+
+#### Validation Error — 400 Bad Request
+
+| 파라미터 | 조건 | 에러 메시지 |
+|----------|------|------------|
+| region | `GN`, `HD` 외의 값 | 지역은 GN 또는 HD만 입력 가능합니다. |
+| genre | `S`, `B` 외의 값 | 장르는 S 또는 B만 입력 가능합니다. |
+
+---
+
 ### GET /api/lessons/{lessonNo}
 레슨 단건을 조회한다.
 
