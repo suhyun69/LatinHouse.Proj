@@ -385,6 +385,82 @@
 
 ---
 
+### POST /api/lesson/random
+`POST /api/lesson` 실행에 필요한 파라미터를 랜덤으로 생성하여 수업을 생성한다.
+
+강사는 기존 프로필 중 `isInstructor=true` 조건으로 조회하여 랜덤 할당한다.  
+조건을 만족하는 프로필이 없는 경우 신규 프로필을 생성한 뒤 강사로 지정하여 사용한다.
+
+#### Request Body
+없음
+
+#### Response
+| Status | 설명 |
+|--------|------|
+| 201 Created | 수업 생성 성공. 생성된 레슨 id 반환 |
+
+```json
+{
+  "id": 1
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | 생성된 레슨 ID |
+
+#### 랜덤 생성 규칙
+
+**강사 할당 규칙**
+
+1. `GET /api/profiles?isInstructor=true` 로 강사 프로필 목록 조회
+2. 남성(`sex=M`) 강사와 여성(`sex=F`) 강사를 각각 분리
+3. 남성/여성 강사 각각에 대해 랜덤 선택 (없으면 신규 생성 후 강사 지정)
+4. 두 강사 중 하나만 랜덤으로 선택하거나 둘 다 할당 가능 (단, 최소 1명 이상 할당)
+
+**신규 프로필 생성 규칙 (강사 없을 때)**
+
+| 항목 | 규칙 |
+|------|------|
+| nickname | `강사_M_<랜덤 4자리 숫자>` (남성) 또는 `강사_F_<랜덤 4자리 숫자>` (여성) |
+| sex | 필요한 성별 (`M` 또는 `F`) |
+
+생성 후 `PATCH /api/profile/{profileId}/instructor` 호출하여 강사 지정.
+
+**레슨 필드 랜덤 생성 규칙**
+
+| 필드 | 규칙 |
+|------|------|
+| title | `<genre명> <레벨>반` 형식. genre=S → `살사`, genre=B → `바차타`. 레벨은 `초급` / `중급` / `상급` 중 랜덤 |
+| genre | `S` 또는 `B` 중 랜덤 |
+| instructorLo | 위 강사 할당 규칙에 따라 결정된 남성 강사 ID 또는 null |
+| instructorLa | 위 강사 할당 규칙에 따라 결정된 여성 강사 ID 또는 null |
+| options | 1~3개 랜덤 생성 |
+| options[].startDate | 오늘로부터 7~60일 이내 랜덤 날짜 (`yyyy-MM-dd`) |
+| options[].startTime | `10:00` / `14:00` / `19:00` / `20:00` 중 랜덤 |
+| options[].endDate | startDate와 동일 |
+| options[].endTime | startTime + 2시간 |
+| options[].region | `GN` 또는 `HD` 중 랜덤 |
+| options[].place | null |
+| options[].placeUrl | null |
+| amount | `30000` / `50000` / `80000` / `100000` 중 랜덤 |
+| discounts | 0~2개 랜덤 생성 |
+| discounts[].type | `E` 또는 `S` 중 랜덤 |
+| discounts[].condition | type=E: options 중 가장 이른 startDate 기준 7일 전 날짜 / type=S: `M` 또는 `F` 중 랜덤 |
+| discounts[].amount | `5000` / `10000` / `15000` 중 랜덤 |
+| account | null |
+| contacts | null |
+| isActive | `true` 고정 |
+| notices | null |
+
+#### Error
+
+| Status | 에러 코드 | 설명 |
+|--------|-----------|------|
+| 500 Internal Server Error | `INTERNAL_ERROR` | 프로필 생성 또는 강사 지정 실패 |
+
+---
+
 ## Profile
 
 ### POST /api/profile
