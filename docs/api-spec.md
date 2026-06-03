@@ -715,3 +715,69 @@ POST /api/lesson과 동일한 비즈니스 규칙 적용.
 | Status | 에러 코드 | 설명 |
 |--------|-----------|------|
 | 404 Not Found | `PROFILE_NOT_FOUND` | 존재하지 않는 profileId |
+
+---
+
+## Order
+
+### POST /api/order
+주문을 생성한다. 구매자 프로필, 레슨, 수업 옵션을 지정하면 주문 레코드가 생성된다. 레슨에 할인이 있을 경우 구매자 조건에 맞는 항목을 자동으로 적용한다.
+
+#### Request Body
+
+```json
+{
+  "lessonNo": 1,
+  "lessonOptionNo": 3,
+  "profileId": "Ab2Cd3Ef"
+}
+```
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| lessonNo | Long | Y | 레슨 ID |
+| lessonOptionNo | Long | Y | 수업 옵션 ID |
+| profileId | String | Y | 구매자 프로필 ID |
+
+#### Response
+
+| Status | 설명 |
+|--------|------|
+| 201 Created | 주문 생성 성공. 생성된 주문 ID 반환 |
+
+```json
+{
+  "orderId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| orderId | String | 생성된 주문 ID (UUID) |
+
+#### Validation Error — 400 Bad Request
+
+| 필드 | 조건 | 에러 메시지 |
+|------|------|------------|
+| lessonNo | null | "레슨을 선택해 주세요." |
+| lessonOptionNo | null | "수업 옵션을 선택해 주세요." |
+| profileId | null 또는 빈 문자열 | "구매자 프로필을 입력해 주세요." |
+
+#### 할인 적용 규칙
+
+주문 생성 시 `Lesson.discounts` 목록을 조회하여 아래 조건을 충족하는 항목만 `Order.discounts`에 기록한다.
+
+| 할인 유형 | 적용 조건 |
+|-----------|-----------|
+| SEX | `LessonDiscount.condition`이 구매자 `Profile.sex`와 일치하는 경우에만 적용 |
+| EARLYBIRD | 주문 생성 시점(`now`) 기준으로 `condition`(yyyy-MM-dd) 날짜가 **아직 지나지 않은** 항목 중 가장 이른 1건만 적용. `condition < now`인 항목은 제외 |
+
+적용된 각 할인 항목은 `OrderDiscount`로 저장되며, `discountType = LESSON`, `discountId = LessonDiscount.id`로 설정된다.
+
+#### Error
+
+| Status | 에러 코드 | 설명 |
+|--------|-----------|------|
+| 404 Not Found | `LESSON_NOT_FOUND` | 존재하지 않는 lessonNo |
+| 404 Not Found | `LESSON_OPTION_NOT_FOUND` | 존재하지 않는 lessonOptionNo |
+| 404 Not Found | `PROFILE_NOT_FOUND` | 존재하지 않는 profileId |

@@ -155,3 +155,104 @@
 | Region | R | 지역 관련 공지 |
 | Normal | N | 일반 공지 |
 | Urgent | U | 긴급 공지 |
+
+---
+
+## Order
+
+### Entity: Order
+
+| 필드 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | String | PK, UUID | 주문 ID |
+| lessonNo | Long | FK → Lesson.id, NOT NULL | 레슨 ID |
+| lessonOptionNo | Long | FK → LessonOption.id, NOT NULL | 수업 옵션 ID |
+| buyer | String | FK → Profile.id, NOT NULL | 구매자 프로필 ID |
+| price | BigDecimal | NOT NULL | 총 주문 금액. `payment.amount + sum(discounts.amount)` |
+| paymentId | Long | FK → Payment.id | 연결된 결제 ID. 결제 완료 후 설정 |
+| status | String | NOT NULL | 주문 상태. `OrderStatus` 참조 |
+
+### Entity: OrderDiscount
+
+| 필드 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | Long | PK, auto increment | |
+| orderId | String | FK → Order.id, NOT NULL | 주문 ID |
+| discountType | String | NOT NULL | 할인 유형. `OrderDiscountType` 참조 |
+| discountId | Long | NOT NULL | 할인 원본 ID (LessonDiscount.id 또는 쿠폰 ID) |
+| amount | BigDecimal | NOT NULL | 할인 금액 |
+
+### Entity: Payment
+
+| 필드 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | Long | PK, auto increment | |
+| orderId | String | FK → Order.id, NOT NULL | 주문 ID |
+| payType | String | NOT NULL | 결제 수단 (카드, 계좌이체 등) |
+| amount | BigDecimal | NOT NULL | 실제 결제 금액 |
+
+---
+
+### Domain: Order
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | String | UUID |
+| lessonNo | Long | |
+| lessonOptionNo | Long | |
+| buyer | String | Profile.id |
+| price | BigDecimal | `payment.amount + sum(discounts.amount)` |
+| paymentId | Long | 결제 완료 후 설정 |
+| discounts | List\<OrderDiscount\> | 적용된 할인 내역 |
+| status | OrderStatus | 주문 상태 |
+
+### Domain: OrderDiscount
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | |
+| orderId | String | |
+| discountType | OrderDiscountType | |
+| discountId | Long | |
+| amount | BigDecimal | |
+
+### Domain: Payment
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | |
+| orderId | String | |
+| payType | String | |
+| amount | BigDecimal | |
+
+### Enum: OrderStatus
+
+| 값 | 설명 |
+|----|------|
+| PAYMENT_PENDING | 결제 대기 중. 주문 생성 직후 초기 상태 |
+| PAYMENT_COMPLETED | 결제 완료 |
+| APPROVED | 승인 완료 |
+| CANCELED | 취소됨 |
+
+### Enum: OrderDiscountType
+
+| 값 | 설명 |
+|----|------|
+| LESSON | 레슨 할인 (LessonDiscount 기반) |
+| COUPON | 쿠폰 할인 |
+
+---
+
+### 할인 적용 흐름 (주문 생성 시)
+
+주문 생성 시 `Lesson.discounts`를 순회하여 아래 규칙에 따라 `Order.discounts`를 구성한다.
+
+| LessonDiscount.type | 적용 조건 | 적용 결과 |
+|---------------------|-----------|-----------|
+| SEX (`S`) | `LessonDiscount.condition == Profile.sex` | 일치하면 1건 추가, 불일치 시 제외 |
+| EARLYBIRD (`E`) | `condition`(yyyy-MM-dd) >= 주문 생성 시점(`now`) 인 항목만 후보. 후보 중 condition이 가장 이른 1건 | 만료된(`condition < now`) 항목 제외. 후보 없으면 미적용 |
+
+적용된 항목은 `OrderDiscount`로 저장되며 다음 값을 가진다.
+- `discountType` = `LESSON`
+- `discountId` = `LessonDiscount.id`
+- `amount` = `LessonDiscount.amount`

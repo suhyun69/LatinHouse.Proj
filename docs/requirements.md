@@ -163,3 +163,49 @@
 | 존재하지 않는 profileId | 404 Not Found | `PROFILE_NOT_FOUND` |
 
 ---
+
+### FR-O-001: 주문 생성
+
+**설명**: 구매자 프로필, 레슨, 수업 옵션을 지정하여 주문을 생성한다.
+
+**API 매핑**: `POST /api/order`
+
+**입력 필드**:
+| 필드 | 타입 | 필수 | 제약조건 |
+|------|------|------|----------|
+| lessonNo | Long | O | 존재하는 Lesson.id |
+| lessonOptionNo | Long | O | 존재하는 LessonOption.id |
+| profileId | String | O | 존재하는 Profile.id |
+
+**처리 규칙**:
+- orderId는 UUID로 자동 생성한다.
+- status는 `PAYMENT_PENDING`으로 초기화한다.
+- price는 레슨의 수강료(`Lesson.amount`)를 기준으로 설정한다. 실제 결제 금액은 `payment.amount`이며, `price = payment.amount + sum(discounts.amount)` 관계를 만족해야 한다.
+- lessonOptionNo는 lessonNo에 속한 옵션이어야 한다.
+- `Lesson.discounts`를 조회하여 구매자 조건에 맞는 항목만 `Order.discounts`로 저장한다.
+  - **SEX 할인**: `LessonDiscount.condition`이 구매자 `Profile.sex`와 일치하는 경우에만 적용. 불일치 시 제외.
+  - **EARLYBIRD 할인**: 주문 생성 시점(`now`) 기준으로 `condition`(yyyy-MM-dd) 날짜가 아직 지나지 않은(`condition >= now`) 항목만 후보로 한다. 후보 중 `condition` 날짜가 가장 이른 1건만 적용. 후보가 없으면 적용하지 않는다.
+  - 적용된 각 항목은 `discountType = LESSON`, `discountId = LessonDiscount.id`로 `OrderDiscount`에 저장된다.
+
+**webRequest 검증 에러 메시지**:
+| 필드 | 조건 | 메시지 |
+|------|------|--------|
+| lessonNo | null | "레슨을 선택해 주세요." |
+| lessonOptionNo | null | "수업 옵션을 선택해 주세요." |
+| profileId | null 또는 빈 문자열 | "구매자 프로필을 입력해 주세요." |
+
+**성공 응답**: 201 Created
+```json
+{
+  "orderId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+**실패 응답**:
+| 조건 | Status | 에러 코드 |
+|------|--------|-----------|
+| 존재하지 않는 lessonNo | 404 Not Found | `LESSON_NOT_FOUND` |
+| 존재하지 않는 lessonOptionNo | 404 Not Found | `LESSON_OPTION_NOT_FOUND` |
+| 존재하지 않는 profileId | 404 Not Found | `PROFILE_NOT_FOUND` |
+
+---
