@@ -385,6 +385,132 @@
 
 ---
 
+### PUT /api/lesson/{lessonNo}
+레슨 전체 데이터를 수정한다. 요청 바디에 포함된 값으로 기존 데이터를 전부 교체(replace)한다.
+
+#### Path Parameters
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| lessonNo | Long | Y | 수정할 레슨 ID |
+
+#### Request Body
+
+POST /api/lesson 요청 바디와 동일한 구조.
+
+```json
+{
+  "title": "살사 중급반",
+  "genre": "S",
+  "instructorLo": "Ab2Cd3Ef",
+  "instructorLa": null,
+  "options": [
+    {
+      "startDate": "2026-07-01",
+      "startTime": "19:00",
+      "endDate": "2026-07-01",
+      "endTime": "21:00",
+      "region": "GN",
+      "place": "강남 스튜디오",
+      "placeUrl": "https://example.com/map"
+    }
+  ],
+  "amount": 80000,
+  "discounts": [
+    {
+      "type": "E",
+      "condition": "2026-06-20",
+      "amount": 10000
+    }
+  ],
+  "account": {
+    "bank": "카카오뱅크",
+    "account": "3333-01-1234567",
+    "name": "홍길동"
+  },
+  "contacts": [
+    {
+      "type": "K",
+      "account": "kakao_id",
+      "name": "카카오채널"
+    }
+  ],
+  "isActive": true,
+  "notices": [
+    {
+      "type": "N",
+      "text": "환불은 수업 3일 전까지 가능합니다."
+    }
+  ]
+}
+```
+
+필드 규칙은 POST /api/lesson과 동일.
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| title | String | Y | 레슨 제목 |
+| genre | String | Y | 장르. `S`(Salsa) 또는 `B`(Bachata) |
+| instructorLo | String | △ | 남성 강사 Profile.id. instructorLa와 둘 중 하나 이상 필수 |
+| instructorLa | String | △ | 여성 강사 Profile.id. instructorLo와 둘 중 하나 이상 필수 |
+| options | List | Y | 수업 옵션. 1개 이상 필수. 기존 옵션 전체 교체 |
+| options[].startDate | String | Y | 시작 날짜. `yyyy-MM-dd` 형식 |
+| options[].startTime | String | Y | 시작 시간. `HH:mm` 형식 |
+| options[].endDate | String | Y | 종료 날짜. `yyyy-MM-dd` 형식 |
+| options[].endTime | String | Y | 종료 시간. `HH:mm` 형식. startDate+startTime보다 이후여야 함 |
+| options[].region | String | Y | 지역. `GN`(Gangnam) 또는 `HD`(Hongdae) |
+| options[].place | String | N | 장소명 |
+| options[].placeUrl | String | N | 장소 URL |
+| amount | BigDecimal | N | 수강료 |
+| discounts | List | N | 할인 목록. 기존 할인 전체 교체 |
+| discounts[].type | String | Y | `E`(Earlybird) 또는 `S`(Sex) |
+| discounts[].condition | String | Y | type=E: `yyyy-MM-dd` 날짜 / type=S: `M` 또는 `F` |
+| discounts[].amount | BigDecimal | N | 할인 금액 |
+| account | Object | N | 입금 계좌 정보. null이면 기존 계좌 삭제 |
+| account.bank | String | N | 은행명 |
+| account.account | String | N | 계좌번호 |
+| account.name | String | N | 예금주 |
+| contacts | List | N | 연락처 목록. 기존 연락처 전체 교체 |
+| contacts[].type | String | Y | `Y`/`K`/`W`/`I`/`L`/`M` |
+| contacts[].account | String | N | 연락처 계정 |
+| contacts[].name | String | N | 표시명 |
+| isActive | Boolean | N | 활성 여부. 기본값 `true` |
+| notices | List | N | 공지 목록. 기존 공지 전체 교체 |
+| notices[].type | String | Y | `L`/`T`/`R`/`N`/`U` |
+| notices[].text | String | N | 공지 내용 |
+
+#### Response
+
+| Status | 설명 |
+|--------|------|
+| 200 OK | 수정 성공. 수정된 레슨 id 반환 |
+
+```json
+{
+  "id": 1
+}
+```
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | 수정된 레슨 ID |
+
+#### Validation Error — 400 Bad Request (webRequest)
+
+POST /api/lesson과 동일한 검증 규칙 적용.
+
+#### Business Rule Error — 400 Bad Request (appRequest)
+
+POST /api/lesson과 동일한 비즈니스 규칙 적용.
+
+#### Error
+
+| Status | 에러 코드 | 설명 |
+|--------|-----------|------|
+| 404 Not Found | `LESSON_NOT_FOUND` | 존재하지 않는 lessonNo |
+
+---
+
 ### POST /api/lesson/random
 `POST /api/lesson` 실행에 필요한 파라미터를 랜덤으로 생성하여 수업을 생성한다.
 
