@@ -256,3 +256,37 @@
 - `discountType` = `LESSON`
 - `discountId` = `LessonDiscount.id`
 - `amount` = `LessonDiscount.amount`
+
+---
+
+### DTO: GET /api/orders (주문 목록 조회)
+
+**신규 클래스**
+
+| 클래스 | 레이어 | 설명 |
+|--------|--------|------|
+| `GetOrdersWebResponse` | Web Adapter (in) | 조회 응답 단건 DTO |
+| `GetOrdersWebMapper` | Web Adapter (in) | AppResponse → WebResponse 변환 |
+| `GetOrdersAppRequest` | Application Port In | buyer(String), lessonNo(Long) 필드 |
+| `GetOrdersAppResponse` | Application Port In | 조회 결과 단건 DTO |
+| `GetOrdersUseCase` | Application Port In | 목록 조회 유스케이스 인터페이스 |
+| `LoadOrderPort` | Application Port Out | DB 조회 인터페이스 |
+
+**GetOrdersWebResponse / GetOrdersAppResponse 필드**
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| orderId | String | 주문 ID (UUID) |
+| lessonNo | Long | 레슨 번호 |
+| lessonOptionNo | Long | 레슨 옵션 번호 |
+| price | BigDecimal | 주문 금액 |
+| status | String | 주문 상태 (`OrderStatus` 값) |
+| discounts | List\<OrderDiscountInfo\> | 적용된 할인 목록 |
+
+**OrderDiscountInfo (중첩 DTO)**
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| discountType | String | 할인 유형 (`OrderDiscountType` 값) |
+| discountId | Long | `LessonDiscount.id` |
+| amount | BigDecimal | 할인 금액 |
