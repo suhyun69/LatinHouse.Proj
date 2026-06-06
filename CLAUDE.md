@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/011-earlybird-expiry-filter/plan.md
+at specs/012-get-orders-list/plan.md
 <!-- SPECKIT END -->

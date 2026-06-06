@@ -781,3 +781,39 @@ POST /api/lesson과 동일한 비즈니스 규칙 적용.
 | 404 Not Found | `LESSON_NOT_FOUND` | 존재하지 않는 lessonNo |
 | 404 Not Found | `LESSON_OPTION_NOT_FOUND` | 존재하지 않는 lessonOptionNo |
 | 404 Not Found | `PROFILE_NOT_FOUND` | 존재하지 않는 profileId |
+
+---
+
+### GET /api/orders
+
+주문 목록을 조회한다. buyer 또는 lessonNo로 필터링할 수 있으며, 두 조건은 AND로 결합된다.
+
+**Query Parameters** (모두 선택사항)
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| buyer | String | N | 구매자 Profile ID로 필터링 |
+| lessonNo | Long | N | 특정 레슨의 주문만 필터링 |
+
+**Response — 200 OK**
+
+```json
+[
+  {
+    "orderId": "550e8400-e29b-41d4-a716-446655440000",
+    "lessonNo": 1,
+    "lessonOptionNo": 3,
+    "price": 80000,
+    "status": "PAYMENT_PENDING",
+    "discounts": [
+      {
+        "discountType": "LESSON",
+        "discountId": 10,
+        "amount": 5000
+      }
+    ]
+  }
+]
+```
+
+파라미터 조건에 맞는 주문이 없으면 빈 배열 `[]` 반환. 에러 없음 (유효하지 않은 buyer/lessonNo는 결과 없음으로 처리).
