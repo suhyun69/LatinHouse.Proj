@@ -870,3 +870,36 @@ POST /api/lesson과 동일한 비즈니스 규칙 적용.
 |------|--------|-----------|
 | 존재하지 않는 templateId | 404 Not Found | `COUPON_TEMPLATE_NOT_FOUND` |
 | count < 1 | 400 Bad Request | - |
+
+---
+
+### PATCH /api/coupon/{profileId}
+
+쿠폰의 소유자(owner)를 지정된 프로필로 배정한다.
+
+**Path Parameters**
+
+| 파라미터 | 타입 | 필수 | 설명 |
+|----------|------|------|------|
+| profileId | String | O | 쿠폰을 배정받을 프로필 ID |
+
+**Request Body**
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| couponId | Long | O | 배정할 쿠폰 ID |
+
+**Response — 200 OK**
+
+```json
+{
+  "couponId": 1
+}
+```
+
+**실패 응답**
+
+| 조건 | Status | 에러 코드 |
+|------|--------|-----------|
+| 존재하지 않는 profileId | 404 Not Found | `PROFILE_NOT_FOUND` |
+| 존재하지 않는 couponId | 404 Not Found | `COUPON_NOT_FOUND` |

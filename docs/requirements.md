@@ -296,3 +296,30 @@
 | 존재하지 않는 templateId | 404 Not Found | `COUPON_TEMPLATE_NOT_FOUND` |
 
 ---
+
+### FR-C-003: 쿠폰 소유자 배정
+
+**설명**: 특정 쿠폰의 소유자(owner)를 지정된 프로필로 배정한다.
+
+**API 매핑**: `PATCH /api/coupon/{profileId}`
+
+**입력 필드**:
+| 필드 | 타입 | 필수 | 제약조건 |
+|------|------|------|----------|
+| profileId (path) | String | O | 존재하는 Profile.id |
+| couponId (body) | Long | O | 존재하는 Coupon.id |
+
+**처리 규칙**:
+- profileId에 해당하는 Profile이 존재하지 않으면 404 에러를 반환한다.
+- couponId에 해당하는 Coupon이 존재하지 않으면 404 에러를 반환한다.
+- Coupon.owner를 profileId로 업데이트한다.
+
+**성공 응답**: 200 OK — `{ "couponId": <id> }`
+
+**실패 응답**:
+| 조건 | Status | 에러 코드 |
+|------|--------|-----------|
+| 존재하지 않는 profileId | 404 Not Found | `PROFILE_NOT_FOUND` |
+| 존재하지 않는 couponId | 404 Not Found | `COUPON_NOT_FOUND` |
+
+---
