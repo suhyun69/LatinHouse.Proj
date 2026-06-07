@@ -817,3 +817,56 @@ POST /api/lesson과 동일한 비즈니스 규칙 적용.
 ```
 
 파라미터 조건에 맞는 주문이 없으면 빈 배열 `[]` 반환. 에러 없음 (유효하지 않은 buyer/lessonNo는 결과 없음으로 처리).
+
+---
+
+## Coupon API
+
+### POST /api/coupon/template
+
+쿠폰 템플릿을 생성한다.
+
+**Request Body**
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| title | String | O | 쿠폰 템플릿 이름 |
+| type | String | O | 쿠폰 유형. `CouponTemplateType` 값 (`LESSON`) |
+| target | Long | O | 적용 대상 ID (type=LESSON이면 lessonNo) |
+| amount | BigDecimal | O | 할인 금액 |
+
+**Response — 201 Created**
+
+```json
+{
+  "couponTemplateId": "1"
+}
+```
+
+**실패 응답**
+
+| 조건 | Status | 에러 코드 |
+|------|--------|-----------|
+| 필수 필드 누락 또는 null | 400 Bad Request | - |
+
+---
+
+### POST /api/coupon
+
+쿠폰 템플릿을 기반으로 쿠폰을 count 개수만큼 일괄 발행한다.
+
+**Request Body**
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| templateId | Long | O | 발행 기준이 될 쿠폰 템플릿 ID |
+| count | Integer | O | 발행할 쿠폰 수량 (1 이상) |
+
+**Response — 201 Created** (Body 없음)
+
+**실패 응답**
+
+| 조건 | Status | 에러 코드 |
+|------|--------|-----------|
+| 존재하지 않는 templateId | 404 Not Found | `COUPON_TEMPLATE_NOT_FOUND` |
+| count < 1 | 400 Bad Request | - |
