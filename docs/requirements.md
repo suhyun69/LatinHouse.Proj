@@ -323,3 +323,19 @@
 | 존재하지 않는 couponId | 404 Not Found | `COUPON_NOT_FOUND` |
 
 ---
+
+### FR-O-003: 주문 생성 시 쿠폰 할인 자동 적용
+
+**설명**: 주문 생성(`POST /api/order`) 시 구매자 프로필이 소유한 쿠폰 중 해당 레슨에 적용 가능한 쿠폰을 자동으로 할인 목록에 포함한다.
+
+**적용 조건**:
+- `Coupon.owner = profileId` (구매자 소유)
+- `Coupon.status = AVAILABLE`
+- `CouponTemplate.type = LESSON`
+- `CouponTemplate.target = lessonNo` (주문한 레슨과 동일)
+
+**결과**: 조건을 충족하는 모든 쿠폰이 `OrderDiscount(discountType=COUPON, discountId=Coupon.id, amount=CouponTemplate.amount)`로 주문에 기록된다.
+
+**비고**: 쿠폰이 없거나 조건에 맞는 쿠폰이 없으면 쿠폰 할인 항목은 생성되지 않는다.
+
+---

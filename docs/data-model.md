@@ -239,23 +239,35 @@
 | 값 | 설명 |
 |----|------|
 | LESSON | 레슨 할인 (LessonDiscount 기반) |
-| COUPON | 쿠폰 할인 |
+| COUPON | 쿠폰 할인 (Coupon/CouponTemplate 기반) |
 
 ---
 
 ### 할인 적용 흐름 (주문 생성 시)
 
-주문 생성 시 `Lesson.discounts`를 순회하여 아래 규칙에 따라 `Order.discounts`를 구성한다.
+주문 생성 시 레슨 할인과 쿠폰 할인을 모두 조회하여 `Order.discounts`를 구성한다.
+
+#### LESSON 할인 (`Lesson.discounts` 기반)
 
 | LessonDiscount.type | 적용 조건 | 적용 결과 |
 |---------------------|-----------|-----------|
-| SEX (`S`) | `LessonDiscount.condition == Profile.sex` | 일치하면 1건 추가, 불일치 시 제외 |
-| EARLYBIRD (`E`) | `condition`(yyyy-MM-dd) >= 주문 생성 시점(`now`) 인 항목만 후보. 후보 중 condition이 가장 이른 1건 | 만료된(`condition < now`) 항목 제외. 후보 없으면 미적용 |
+| SEX | `LessonDiscount.condition == Profile.sex` | 일치하면 1건 추가, 불일치 시 제외 |
+| EARLYBIRD | `condition`(yyyy-MM-dd) >= 주문 생성 시점(`now`) 인 항목만 후보. 후보 중 condition이 가장 이른 1건 | 만료된(`condition < now`) 항목 제외. 후보 없으면 미적용 |
 
-적용된 항목은 `OrderDiscount`로 저장되며 다음 값을 가진다.
-- `discountType` = `LESSON`
-- `discountId` = `LessonDiscount.id`
-- `amount` = `LessonDiscount.amount`
+LESSON 할인 적용 시 `OrderDiscount` 값:
+- `discountType` = `LESSON`, `discountId` = `LessonDiscount.id`, `amount` = `LessonDiscount.amount`
+
+#### COUPON 할인 (`Coupon`/`CouponTemplate` 기반)
+
+| 조건 | 설명 |
+|------|------|
+| `Coupon.owner = profileId` | 구매자가 소유한 쿠폰만 대상 |
+| `Coupon.status = AVAILABLE` | 미사용 쿠폰만 대상 |
+| `CouponTemplate.type = LESSON` | LESSON 유형 쿠폰 템플릿만 대상 |
+| `CouponTemplate.target = lessonNo` | 주문 레슨과 동일한 target만 적용 |
+
+조건을 충족하는 쿠폰은 **모두** `OrderDiscount`로 추가된다:
+- `discountType` = `COUPON`, `discountId` = `Coupon.id`, `amount` = `CouponTemplate.amount`
 
 ---
 

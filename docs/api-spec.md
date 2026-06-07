@@ -771,8 +771,9 @@ POST /api/lesson과 동일한 비즈니스 규칙 적용.
 |-----------|-----------|
 | SEX | `LessonDiscount.condition`이 구매자 `Profile.sex`와 일치하는 경우에만 적용 |
 | EARLYBIRD | 주문 생성 시점(`now`) 기준으로 `condition`(yyyy-MM-dd) 날짜가 **아직 지나지 않은** 항목 중 가장 이른 1건만 적용. `condition < now`인 항목은 제외 |
+| COUPON | `Coupon.owner = profileId`이고 `Coupon.status = AVAILABLE`인 쿠폰 중, `CouponTemplate.type = LESSON`이고 `CouponTemplate.target = lessonNo`인 쿠폰을 모두 적용. `discountId = Coupon.id`, `amount = CouponTemplate.amount` |
 
-적용된 각 할인 항목은 `OrderDiscount`로 저장되며, `discountType = LESSON`, `discountId = LessonDiscount.id`로 설정된다.
+적용된 각 할인 항목은 `OrderDiscount`로 저장되며, LESSON 유형은 `discountType = LESSON`, `discountId = LessonDiscount.id`로, COUPON 유형은 `discountType = COUPON`, `discountId = Coupon.id`로 설정된다.
 
 #### Error
 
