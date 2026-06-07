@@ -373,3 +373,29 @@
 | `CreateCouponUseCase` | Application Port In | 쿠폰 발행 유스케이스 인터페이스 |
 | `LoadCouponTemplatePort` | Application Port Out | 템플릿 조회 인터페이스 |
 | `SaveCouponPort` | Application Port Out | 쿠폰 저장 인터페이스 |
+
+### DTO: PATCH /api/coupon/{profileId} (쿠폰 소유자 배정)
+
+**신규 클래스**
+
+| 클래스 | 레이어 | 설명 |
+|--------|--------|------|
+| `AssignCouponWebRequest` | Web Adapter (in) | 배정 요청 DTO (`couponId: Long`) |
+| `AssignCouponWebResponse` | Web Adapter (in) | 배정 응답 DTO (`couponId: Long`) |
+| `AssignCouponAppRequest` | Application Port In | profileId: String, couponId: Long |
+| `AssignCouponAppResponse` | Application Port In | couponId: Long |
+| `AssignCouponUseCase` | Application Port In | 쿠폰 소유자 배정 유스케이스 인터페이스 |
+| `LoadCouponPort` | Application Port Out | 쿠폰 단건 조회 인터페이스 |
+| `UpdateCouponPort` | Application Port Out | 쿠폰 업데이트 인터페이스 |
+
+**Port Out 추가**
+
+| 인터페이스 | 메서드 | 설명 |
+|-----------|--------|------|
+| `LoadCouponPort` | `Optional<Coupon> findById(Long couponId)` | 쿠폰 단건 조회 |
+| `UpdateCouponPort` | `Coupon update(Coupon coupon)` | 쿠폰 저장(owner 업데이트) |
+
+**CouponEntity 변경**
+
+`owner` 필드 업데이트를 위한 setter 또는 업데이트 메서드 추가 필요:
+- `updateOwner(String owner)` 메서드 추가
