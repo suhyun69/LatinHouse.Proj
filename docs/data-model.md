@@ -290,3 +290,86 @@
 | discountType | String | 할인 유형 (`OrderDiscountType` 값) |
 | discountId | Long | `LessonDiscount.id` |
 | amount | BigDecimal | 할인 금액 |
+
+---
+
+## Coupon
+
+### Domain: CouponTemplate
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | auto-increment PK |
+| title | String | 쿠폰 템플릿 이름 |
+| type | CouponTemplateType | 쿠폰 유형 |
+| target | Long | 적용 대상 ID (type=LESSON이면 lessonNo) |
+| amount | BigDecimal | 할인 금액 |
+
+### Domain: Coupon
+
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| id | Long | auto-increment PK |
+| templateId | Long | CouponTemplate.id |
+| owner | String | 쿠폰 소유자 Profile.id (발행 직후 null) |
+| status | CouponStatus | 쿠폰 상태. 기본값: `AVAILABLE` |
+
+### Entity: coupon_templates
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | |
+| title | VARCHAR | NOT NULL | |
+| type | VARCHAR | NOT NULL | `CouponTemplateType` 값 |
+| target | BIGINT | NOT NULL | |
+| amount | DECIMAL | NOT NULL | |
+
+### Entity: coupons
+
+| 컬럼 | 타입 | 제약 | 설명 |
+|------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | |
+| template_id | BIGINT | NOT NULL | FK → coupon_templates.id |
+| owner | VARCHAR | NULL | |
+| status | VARCHAR | NOT NULL | 기본값 `AVAILABLE` |
+
+### Enum: CouponTemplateType
+
+| 값 | 설명 |
+|----|------|
+| LESSON | 특정 레슨에 적용되는 쿠폰 |
+
+### Enum: CouponStatus
+
+| 값 | 설명 |
+|----|------|
+| AVAILABLE | 사용 가능 상태 (초기값) |
+| USED | 사용 완료 상태 |
+
+---
+
+### DTO: POST /api/coupon/template (쿠폰 템플릿 생성)
+
+**신규 클래스**
+
+| 클래스 | 레이어 | 설명 |
+|--------|--------|------|
+| `CreateCouponTemplateWebRequest` | Web Adapter (in) | 생성 요청 DTO |
+| `CreateCouponTemplateWebResponse` | Web Adapter (in) | 생성 응답 DTO (`couponTemplateId: String`) |
+| `CouponWebMapper` | Web Adapter (in) | Web ↔ App 변환 |
+| `CreateCouponTemplateAppRequest` | Application Port In | title, type, target, amount |
+| `CreateCouponTemplateAppResponse` | Application Port In | couponTemplateId: Long |
+| `CreateCouponTemplateUseCase` | Application Port In | 템플릿 생성 유스케이스 인터페이스 |
+| `SaveCouponTemplatePort` | Application Port Out | DB 저장 인터페이스 |
+
+### DTO: POST /api/coupon (쿠폰 일괄 발행)
+
+**신규 클래스**
+
+| 클래스 | 레이어 | 설명 |
+|--------|--------|------|
+| `CreateCouponWebRequest` | Web Adapter (in) | 발행 요청 DTO |
+| `CreateCouponAppRequest` | Application Port In | templateId: Long, count: Integer |
+| `CreateCouponUseCase` | Application Port In | 쿠폰 발행 유스케이스 인터페이스 |
+| `LoadCouponTemplatePort` | Application Port Out | 템플릿 조회 인터페이스 |
+| `SaveCouponPort` | Application Port Out | 쿠폰 저장 인터페이스 |

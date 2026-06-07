@@ -248,3 +248,51 @@
 | 존재하지 않는 profileId | 404 Not Found | `PROFILE_NOT_FOUND` |
 
 ---
+
+### FR-C-001: 쿠폰 템플릿 생성
+
+**설명**: 쿠폰 유형, 적용 대상, 할인 금액을 지정하여 쿠폰 템플릿을 생성한다.
+
+**API 매핑**: `POST /api/coupon/template`
+
+**입력 필드**:
+| 필드 | 타입 | 필수 | 제약조건 |
+|------|------|------|----------|
+| title | String | O | - |
+| type | String | O | `LESSON` |
+| target | Long | O | - |
+| amount | BigDecimal | O | - |
+
+**처리 규칙**:
+- id는 DB auto-increment로 자동 생성한다.
+- type은 `CouponTemplateType` enum으로 변환하여 저장한다.
+
+**성공 응답**: 201 Created — `{ "couponTemplateId": "<id>" }`
+
+---
+
+### FR-C-002: 쿠폰 일괄 발행
+
+**설명**: 쿠폰 템플릿을 기반으로 쿠폰을 지정된 수량만큼 발행한다.
+
+**API 매핑**: `POST /api/coupon`
+
+**입력 필드**:
+| 필드 | 타입 | 필수 | 제약조건 |
+|------|------|------|----------|
+| templateId | Long | O | 존재하는 CouponTemplate.id |
+| count | Integer | O | 1 이상 |
+
+**처리 규칙**:
+- templateId에 해당하는 CouponTemplate이 없으면 404 에러를 반환한다.
+- count 개수만큼 Coupon을 생성한다.
+- 각 Coupon의 owner는 null, status는 `AVAILABLE`로 초기화한다.
+
+**성공 응답**: 201 Created (Body 없음)
+
+**실패 응답**:
+| 조건 | Status | 에러 코드 |
+|------|--------|-----------|
+| 존재하지 않는 templateId | 404 Not Found | `COUPON_TEMPLATE_NOT_FOUND` |
+
+---
