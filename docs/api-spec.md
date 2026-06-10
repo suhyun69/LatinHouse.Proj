@@ -396,7 +396,7 @@
 
 #### Request Body
 
-POST /api/lesson 요청 바디와 동일한 구조.
+POST /api/lesson 요청 바디와 유사하나, 하위 항목(options, discounts, account, contacts, notices)에 `id`를 추가로 받는다. `id`를 전달하면 기존 레코드를 식별하여 교체하고, 생략하면 새 레코드로 처리한다.
 
 ```json
 {
@@ -406,6 +406,7 @@ POST /api/lesson 요청 바디와 동일한 구조.
   "instructorLa": null,
   "options": [
     {
+      "id": 1,
       "startDate": "2026-07-01",
       "startTime": "19:00",
       "endDate": "2026-07-01",
@@ -418,18 +419,21 @@ POST /api/lesson 요청 바디와 동일한 구조.
   "amount": 80000,
   "discounts": [
     {
+      "id": 1,
       "type": "E",
       "condition": "2026-06-20",
       "amount": 10000
     }
   ],
   "account": {
+    "id": 1,
     "bank": "카카오뱅크",
     "account": "3333-01-1234567",
     "name": "홍길동"
   },
   "contacts": [
     {
+      "id": 1,
       "type": "K",
       "account": "kakao_id",
       "name": "카카오채널"
@@ -438,14 +442,13 @@ POST /api/lesson 요청 바디와 동일한 구조.
   "isActive": true,
   "notices": [
     {
+      "id": 1,
       "type": "N",
       "text": "환불은 수업 3일 전까지 가능합니다."
     }
   ]
 }
 ```
-
-필드 규칙은 POST /api/lesson과 동일.
 
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
@@ -454,6 +457,7 @@ POST /api/lesson 요청 바디와 동일한 구조.
 | instructorLo | String | △ | 남성 강사 Profile.id. instructorLa와 둘 중 하나 이상 필수 |
 | instructorLa | String | △ | 여성 강사 Profile.id. instructorLo와 둘 중 하나 이상 필수 |
 | options | List | Y | 수업 옵션. 1개 이상 필수. 기존 옵션 전체 교체 |
+| options[].id | Long | N | 수업 옵션 ID. 기존 레코드 식별용. 생략 시 신규 생성 |
 | options[].startDate | String | Y | 시작 날짜. `yyyy-MM-dd` 형식 |
 | options[].startTime | String | Y | 시작 시간. `HH:mm` 형식 |
 | options[].endDate | String | Y | 종료 날짜. `yyyy-MM-dd` 형식 |
@@ -463,19 +467,23 @@ POST /api/lesson 요청 바디와 동일한 구조.
 | options[].placeUrl | String | N | 장소 URL |
 | amount | BigDecimal | N | 수강료 |
 | discounts | List | N | 할인 목록. 기존 할인 전체 교체 |
+| discounts[].id | Long | N | 할인 ID. 기존 레코드 식별용. 생략 시 신규 생성 |
 | discounts[].type | String | Y | `E`(Earlybird) 또는 `S`(Sex) |
 | discounts[].condition | String | Y | type=E: `yyyy-MM-dd` 날짜 / type=S: `M` 또는 `F` |
 | discounts[].amount | BigDecimal | N | 할인 금액 |
 | account | Object | N | 입금 계좌 정보. null이면 기존 계좌 삭제 |
+| account.id | Long | N | 계좌 ID. 기존 레코드 식별용. 생략 시 신규 생성 |
 | account.bank | String | N | 은행명 |
 | account.account | String | N | 계좌번호 |
 | account.name | String | N | 예금주 |
 | contacts | List | N | 연락처 목록. 기존 연락처 전체 교체 |
+| contacts[].id | Long | N | 연락처 ID. 기존 레코드 식별용. 생략 시 신규 생성 |
 | contacts[].type | String | Y | `Y`/`K`/`W`/`I`/`L`/`M` |
 | contacts[].account | String | N | 연락처 계정 |
 | contacts[].name | String | N | 표시명 |
 | isActive | Boolean | N | 활성 여부. 기본값 `true` |
 | notices | List | N | 공지 목록. 기존 공지 전체 교체 |
+| notices[].id | Long | N | 공지 ID. 기존 레코드 식별용. 생략 시 신규 생성 |
 | notices[].type | String | Y | `L`/`T`/`R`/`N`/`U` |
 | notices[].text | String | N | 공지 내용 |
 
